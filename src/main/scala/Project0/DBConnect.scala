@@ -1,6 +1,7 @@
 package Project0
 
 import java.sql.{Connection, DriverManager, SQLException}
+import io.AnsiColor._
 
 object DBConnect {
 
@@ -32,7 +33,7 @@ object DBConnect {
     connection.close()
   }
 
-  def showProducts(id: Int, store: String) : Unit = {
+  def showProducts(id: String, store: String) : Unit = {
     try {
       val statement = connection.createStatement()
 //      val resultSet1 = statement.executeQuery("SELECT name FROM target_products WHERE product_id = '" + sku + "'")
@@ -45,28 +46,50 @@ object DBConnect {
         store + "_products as tp " +
         "ON tp.product_id = dpci.product_id " +
         "WHERE tp.product_id = '" + id + "'")
-//      while(resultSet1.next()){
-//        val product = resultSet1.getString("name")
-//        println(product)
-//      }
-      while ( resultSet.next() ) {
-        if(resultSet.isFirst()){
-          val product_name = resultSet.getString("tp.name")
-          val desc = resultSet.getString("tp.description")
-          println("Product: " + product_name)
-          println("Description: " + desc)
-          println()
-          println("Store            Availability            Price")
-        }
-        val store_name = resultSet.getString("st.store_name")
-        val address = resultSet.getString("st.address")
-        val quantity = resultSet.getString("dpci.quantity")
-        val price = resultSet.getString("tp.price")
 
-        println(store_name + "            " + quantity + "            " + price)
-        println(address)
+      if(resultSet.next() == false) {
+        println("No Results Were Found")
         println()
+        return
       }
+      else {
+        do{
+          if(resultSet.isFirst){
+            val product_name = resultSet.getString("tp.name")
+            val desc = resultSet.getString("tp.description")
+            println("Product: " + product_name)
+            println("Description: " + desc)
+            println()
+            printf("%-30s%-30s%-30s\n","Store","Availability","Price")
+          }
+          val store_name = resultSet.getString("st.store_name")
+          val address = resultSet.getString("st.address")
+          val quantity = resultSet.getString("dpci.quantity")
+          val price = resultSet.getString("tp.price")
+
+          printf("%-30s%-30s%-30s\n",store_name,quantity,price)
+          println(address)
+          println()
+        }while(resultSet.next())
+      }
+//      while ( resultSet.next() ) {
+//        if(resultSet.isFirst){
+//          val product_name = resultSet.getString("tp.name")
+//          val desc = resultSet.getString("tp.description")
+//          println("Product: " + product_name)
+//          println("Description: " + desc)
+//          println()
+//          printf("%-30s%-30s%-30s\n","Store","Availability","Price")
+//        }
+//        val store_name = resultSet.getString("st.store_name")
+//        val address = resultSet.getString("st.address")
+//        val quantity = resultSet.getString("dpci.quantity")
+//        val price = resultSet.getString("tp.price")
+//
+//        printf("%-30s%-30s%-30s\n",store_name,quantity,price)
+//        println(address)
+//        println()
+
     } catch {
       case e: Exception => e.printStackTrace()
     }
@@ -78,7 +101,7 @@ object DBConnect {
       val statement = connection.createStatement()
       val resultSet = statement.executeQuery("SELECT product_id, name FROM " + store + "_products where REGEXP_LIKE(name, '" + str + "', 'i')")
       if(!resultSet.next()) {
-        println("No Results Were Found")
+        println(s"${RED}No Results Were Found${RESET}")
         println()
         return
       }
@@ -88,14 +111,13 @@ object DBConnect {
         val name = resultSet.getString("name")
         println(name)
         if(store == "walmart") {
-          println("SKU: " + product_id)
+          println(s"SKU: ${GREEN}" + product_id + s"${RESET}")
         } else if(store == "target")
-          println("DPCI: " + product_id)
+          println(s"DPCI: ${GREEN}" + product_id + s"${RESET}")
         println()
       }
     } catch {
       case e: Exception => e.printStackTrace()
-        case sql: SQLException => sql.printStackTrace()
     }
 
   }
