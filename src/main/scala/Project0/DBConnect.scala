@@ -32,20 +32,23 @@ object DBConnect {
     connection.close()
   }
 
-  def showProducts(sku: Int) : Unit = {
+  def showProducts(id: Int, store: String) : Unit = {
     try {
-
-
       val statement = connection.createStatement()
+//      val resultSet1 = statement.executeQuery("SELECT name FROM target_products WHERE product_id = '" + sku + "'")
       val resultSet = statement.executeQuery("SELECT st.store_name, st.address, dpci.quantity, tp.price " +
         "FROM stores AS st " +
         "INNER JOIN " +
         "dpci_stock as dpci " +
         "ON dpci.store_id = st.store_id " +
         "INNER JOIN " +
-        "target_products as tp " +
+        store + "_products as tp " +
         "ON tp.product_id = dpci.product_id " +
-        "WHERE tp.product_id = '" + sku + "'")
+        "WHERE tp.product_id = '" + id + "'")
+//      while(resultSet1.next()){
+//        val product = resultSet1.getString("name")
+//        println(product)
+//      }
       println("Store            Availability            Price")
       while ( resultSet.next() ) {
         val store_name = resultSet.getString("st.store_name")
@@ -62,11 +65,11 @@ object DBConnect {
     }
   }
 
-  def listSKU(str: String) : Unit = {
+  def listSKU(str: String, store: String) : Unit = {
     try{
 
       val statement = connection.createStatement()
-      val resultSet = statement.executeQuery("SELECT product_id, name FROM target_products where name = '" + str + "'")
+      val resultSet = statement.executeQuery("SELECT product_id, name FROM " + store + "_products where REGEXP_LIKE(name, '" + str + "', 'i')")
 //      if(!resultSet.next()) {
 //        println("No Results Were Found")
 //        return
@@ -75,7 +78,9 @@ object DBConnect {
       while ( resultSet.next() ) {
         val product_id = resultSet.getString("product_id")
         val name = resultSet.getString("name")
-        println("SKU, name = " + product_id + ", " + name)
+        println(name)
+        println("SKU: " + product_id)
+        println()
       }
     } catch {
       case e: Exception => e.printStackTrace()
