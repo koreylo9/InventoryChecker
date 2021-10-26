@@ -36,7 +36,7 @@ object DBConnect {
     try {
       val statement = connection.createStatement()
 //      val resultSet1 = statement.executeQuery("SELECT name FROM target_products WHERE product_id = '" + sku + "'")
-      val resultSet = statement.executeQuery("SELECT st.store_name, st.address, dpci.quantity, tp.price " +
+      val resultSet = statement.executeQuery("SELECT st.store_name, st.address, dpci.quantity, tp.* " +
         "FROM stores AS st " +
         "INNER JOIN " +
         "dpci_stock as dpci " +
@@ -49,8 +49,15 @@ object DBConnect {
 //        val product = resultSet1.getString("name")
 //        println(product)
 //      }
-      println("Store            Availability            Price")
       while ( resultSet.next() ) {
+        if(resultSet.isFirst()){
+          val product_name = resultSet.getString("tp.name")
+          val desc = resultSet.getString("tp.description")
+          println("Product: " + product_name)
+          println("Description: " + desc)
+          println()
+          println("Store            Availability            Price")
+        }
         val store_name = resultSet.getString("st.store_name")
         val address = resultSet.getString("st.address")
         val quantity = resultSet.getString("dpci.quantity")
@@ -70,16 +77,20 @@ object DBConnect {
 
       val statement = connection.createStatement()
       val resultSet = statement.executeQuery("SELECT product_id, name FROM " + store + "_products where REGEXP_LIKE(name, '" + str + "', 'i')")
-//      if(!resultSet.next()) {
-//        println("No Results Were Found")
-//        return
-//      }
+      if(!resultSet.next()) {
+        println("No Results Were Found")
+        println()
+        return
+      }
 
       while ( resultSet.next() ) {
         val product_id = resultSet.getString("product_id")
         val name = resultSet.getString("name")
         println(name)
-        println("SKU: " + product_id)
+        if(store == "walmart") {
+          println("SKU: " + product_id)
+        } else if(store == "target")
+          println("DPCI: " + product_id)
         println()
       }
     } catch {
