@@ -28,35 +28,38 @@ object InventoryChecker {
   }
 
   @tailrec
-  def walmart() : Unit = {
-    println("Walmart Inventory Checker")
-    println("Walmart uses an SKU (Stock Keeping Unit) number to store all of their items.  " +
+  def target() : Unit = {
+    println("Target Inventory Checker")
+    println("Target uses an SKU (Stock Keeping Unit) number to store all of their items.  " +
       "If you know the SKU you can search by that or utilize our SKU finder.")
     println("(1) Enter SKU ")
     println("(2) Use SKU finder")
+    println("(3) Return to Main Menu")
+    println("(4) Exit")
     val option = scala.io.StdIn.readInt()
     option match {
       case 1 => searchProduct()
       case 2 => skuFinder()
-      case _ => walmart()
+      case 3 => startMenu()
+      case 4 => exitApp()
+      case _ => target()
     }
   }
 
   def skuFinder() : Unit = {
-    print("What are you looking for: ")
+    print("What product are you looking for: ")
     val option = scala.io.StdIn.readLine()
-    DBConnect.selectQuery(option)
-
-
+    DBConnect.listSKU(option)
   }
 
   def searchProduct() : Unit = {
-
-
+    print("Enter SKU for product: ")
+    val option = scala.io.StdIn.readInt()
+    DBConnect.showProducts(option)
   }
 
-  def target() : Unit = {
-    println("Target Inventory Checker")
+  def walmart() : Unit = {
+    println("Walmart Inventory Checker")
   }
 
   def exitApp() : Unit = {

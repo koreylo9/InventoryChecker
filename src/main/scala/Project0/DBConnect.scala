@@ -1,6 +1,6 @@
 package Project0
 
-import java.sql.{Connection, DriverManager}
+import java.sql.{Connection, DriverManager, SQLException}
 
 object DBConnect {
 
@@ -32,14 +32,56 @@ object DBConnect {
     connection.close()
   }
 
-  def selectQuery(str: String) : Unit = {
-    val statement = connection.createStatement()
-    val resultSet = statement.executeQuery("SELECT product_id, name FROM target_products where name = '" + str + "'")
-    while ( resultSet.next() ) {
-      val product_id = resultSet.getString("product_id")
-      val name = resultSet.getString("name")
-      println("SKU, name = " + product_id + ", " + name)
+  def showProducts(sku: Int) : Unit = {
+    try {
+
+
+      val statement = connection.createStatement()
+      val resultSet = statement.executeQuery("SELECT st.store_name, st.address, dpci.quantity, tp.price " +
+        "FROM stores AS st " +
+        "INNER JOIN " +
+        "dpci_stock as dpci " +
+        "ON dpci.store_id = st.store_id " +
+        "INNER JOIN " +
+        "target_products as tp " +
+        "ON tp.product_id = dpci.product_id " +
+        "WHERE tp.product_id = '" + sku + "'")
+      println("Store            Availability            Price")
+      while ( resultSet.next() ) {
+        val store_name = resultSet.getString("st.store_name")
+        val address = resultSet.getString("st.address")
+        val quantity = resultSet.getString("dpci.quantity")
+        val price = resultSet.getString("tp.price")
+
+        println(store_name + "            " + quantity + "            " + price)
+        println(address)
+        println()
+      }
+    } catch {
+      case e: Exception => e.printStackTrace()
     }
+  }
+
+  def listSKU(str: String) : Unit = {
+    try{
+
+      val statement = connection.createStatement()
+      val resultSet = statement.executeQuery("SELECT product_id, name FROM target_products where name = '" + str + "'")
+//      if(!resultSet.next()) {
+//        println("No Results Were Found")
+//        return
+//      }
+
+      while ( resultSet.next() ) {
+        val product_id = resultSet.getString("product_id")
+        val name = resultSet.getString("name")
+        println("SKU, name = " + product_id + ", " + name)
+      }
+    } catch {
+      case e: Exception => e.printStackTrace()
+        case sql: SQLException => sql.printStackTrace()
+    }
+
   }
 
 }
